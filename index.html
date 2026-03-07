@@ -359,8 +359,11 @@ html,body{height:100%;background:#0f1117;color:#e8eaf0;font-family:-apple-system
 // ═══════════════════════════════════════════════════
 //  ESTADO GLOBAL
 // ═══════════════════════════════════════════════════
+// Proxy fijo — Cloudflare Worker que permite llamadas HTTP desde HTTPS
+const PROXY = 'https://myownstream.lone-wolf-verified.workers.dev';
+
 const S = {
-  server: '', user: '', pass: '',
+  server: '', user: '', pass: '', proxy: PROXY,
   activeTab: 'live',
   live:   { cats: [], streams: [], activeCat: 'all', search: '', loaded: false },
   movies: { cats: [], streams: [], activeCat: 'all', search: '', loaded: false },
@@ -376,12 +379,18 @@ const api = {
   _base() {
     return `${S.server}/player_api.php?username=${enc(S.user)}&password=${enc(S.pass)}`;
   },
+  // Si hay proxy, enruta la petición a través del Worker:
+  //   https://worker.dev/ + http://servidor/player_api.php?...
+  _proxied(url) {
+    return S.proxy ? `${S.proxy.replace(/\/$/, '')}/${url}` : url;
+  },
   async get(action, extra = '') {
-    const url = `${this._base()}&action=${action}${extra}`;
+    const url = this._proxied(`${this._base()}&action=${action}${extra}`);
     const r = await fetch(url);
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     return r.json();
   },
+  // Las URLs de video van directo (el proxy no es necesario para media en la mayoría de casos)
   liveUrl(id)           { return `${S.server}/live/${S.user}/${S.pass}/${id}.m3u8`; },
   vodUrl(id, ext)       { return `${S.server}/movie/${S.user}/${S.pass}/${id}.${ext || 'mp4'}`; },
   seriesEpUrl(id, ext)  { return `${S.server}/series/${S.user}/${S.pass}/${id}.${ext || 'mp4'}`; }
@@ -760,30 +769,18 @@ document.querySelectorAll('.tab').forEach(btn => {
 //  LOGIN / LOGOUT
 // ═══════════════════════════════════════════════════
 async function doLogin() {
-  const url  = $('loginUrl').value.trim().replace(/\/+$/, '');
-  const user = $('loginUser').value.trim();
-  const pass = $('loginPass').value;
+  const url   = $('loginUrl').value.trim().replace(/\/+$/, '');
+  const user  = $('loginUser').value.trim();
+  const pass  = $('loginPass').value;
   const errEl = $('loginError');
   const btn   = $('btnLogin');
 
   if (!url || !user || !pass) { errEl.textContent = 'Completa todos los campos'; return; }
 
-  // Mixed Content: página en HTTPS no puede llamar a servidor HTTP
-  if (location.protocol === 'https:' && url.startsWith('http:')) {
-    errEl.innerHTML =
-      'Paso \u00fanico \u2014 hacer esto <b>una sola vez</b> en Chrome:<br><br>' +
-      '1\ufe0f\u20e3 Haz clic en el \uD83D\uDD12 candado junto a la URL arriba<br>' +
-      '2\ufe0f\u20e3 Selecciona <b>Configuraci\u00f3n del sitio</b><br>' +
-      '3\ufe0f\u20e3 Busca <b>Contenido no seguro</b> \u2192 cambia a <b>Permitir</b><br>' +
-      '4\ufe0f\u20e3 Recarga la p\u00e1gina y ya conecta \u2705<br><br>' +
-      '<span style="color:#5c6478;font-size:11px">Solo afecta a este sitio, no a todo Chrome.</span>';
-    return;
-  }
-
   errEl.textContent = '';
   btn.textContent   = 'Conectando...';
   btn.disabled      = true;
-  S.server = url; S.user = user; S.pass = pass;
+  S.server = url; S.user = user; S.pass = pass; S.proxy = PROXY;
 
   try {
     const auth = await api.get('authenticate');
@@ -860,7 +857,7 @@ $('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin
     $('loginUrl').value  = s;
     $('loginUser').value = u;
     $('loginPass').value = p;
-    S.server = s; S.user = u; S.pass = p;
+    S.server = s; S.user = u; S.pass = p; S.proxy = PROXY;
     showApp();
   }
 })();
