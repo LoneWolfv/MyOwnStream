@@ -253,6 +253,16 @@ html,body{height:100%;background:#0f1117;color:#e8eaf0;font-family:-apple-system
     <input id="loginPass" type="password" placeholder="Contraseña">
     <button id="btnLogin">Entrar</button>
     <div id="loginError"></div>
+    <div id="loginHelp" style="display:none;background:#0f1117;border:1px solid #2a2f3e;border-radius:8px;padding:12px;font-size:12px;color:#9aa0b4;line-height:1.8">
+      <b style="color:#e8eaf0">Si tu servidor usa http:// (sin SSL):</b><br>
+      1&#65039;&#8419; Clic en el &#128274; candado junto a la URL<br>
+      2&#65039;&#8419; <b>Configuraci&#243;n del sitio</b><br>
+      3&#65039;&#8419; <b>Contenido no seguro</b> &#8594; <b>Permitir</b><br>
+      4&#65039;&#8419; Recargar &#8594; listo &#10003;
+    </div>
+    <button id="btnHelp" style="background:none;border:none;color:#5c6478;font-size:12px;cursor:pointer;padding:0">
+      &#63; &#191;No puedes conectar?
+    </button>
   </div>
 </div>
 
@@ -761,14 +771,12 @@ async function doLogin() {
   // Mixed Content: página en HTTPS no puede llamar a servidor HTTP
   if (location.protocol === 'https:' && url.startsWith('http:')) {
     errEl.innerHTML =
-      'Tu servidor usa <b>http://</b> (sin SSL).<br>' +
-      'Para conectar tienes dos opciones:<br><br>' +
-      '<b>Opci\u00f3n 1 \u2014 Abrir el archivo local:</b><br>' +
-      'Abre <code style="background:#1a1f2e;padding:2px 6px;border-radius:4px">docs/index.html</code> ' +
-      'directamente desde tu computadora (doble clic) \u2014 sin restricciones.<br><br>' +
-      '<b>Opci\u00f3n 2 \u2014 Permitir en Chrome:</b><br>' +
-      'Configuraci\u00f3n \u2192 Privacidad \u2192 Configuraci\u00f3n del sitio \u2192 ' +
-      'Contenido no seguro \u2192 Agregar <b>lonewolfv.github.io</b>';
+      'Paso \u00fanico \u2014 hacer esto <b>una sola vez</b> en Chrome:<br><br>' +
+      '1\ufe0f\u20e3 Haz clic en el \uD83D\uDD12 candado junto a la URL arriba<br>' +
+      '2\ufe0f\u20e3 Selecciona <b>Configuraci\u00f3n del sitio</b><br>' +
+      '3\ufe0f\u20e3 Busca <b>Contenido no seguro</b> \u2192 cambia a <b>Permitir</b><br>' +
+      '4\ufe0f\u20e3 Recarga la p\u00e1gina y ya conecta \u2705<br><br>' +
+      '<span style="color:#5c6478;font-size:11px">Solo afecta a este sitio, no a todo Chrome.</span>';
     return;
   }
 
@@ -833,6 +841,10 @@ function doLogout() {
 
 $('btnLogin').addEventListener('click',  doLogin);
 $('btnLogout').addEventListener('click', doLogout);
+$('btnHelp').addEventListener('click', () => {
+  const h = $('loginHelp');
+  h.style.display = h.style.display === 'none' ? 'block' : 'none';
+});
 $('loginUrl').addEventListener('keydown',  e => { if (e.key === 'Enter') $('loginUser').focus(); });
 $('loginUser').addEventListener('keydown', e => { if (e.key === 'Enter') $('loginPass').focus(); });
 $('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
