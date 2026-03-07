@@ -231,10 +231,8 @@ html,body{height:100%;background:#0f1117;color:#e8eaf0;font-family:-apple-system
 }
 @media(min-width:900px){
   .mediaGrid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
-  .modalCard{max-width:700px;margin:0 auto}
-  .modal{display:flex;align-items:flex-start;justify-content:center;padding:20px 0}
-  .modal.open{display:flex}
-  .modalCard{border-radius:12px;min-height:unset;border:1px solid #2a2f3e}
+  .modalCard{max-width:700px;margin:0 auto;border-radius:12px;min-height:unset;border:1px solid #2a2f3e}
+  .modal.open{display:flex;align-items:flex-start;justify-content:center;padding:20px 0}
   .modalBanner{max-height:280px;border-radius:12px 12px 0 0}
 }
 </style>
@@ -759,6 +757,19 @@ async function doLogin() {
   const btn   = $('btnLogin');
 
   if (!url || !user || !pass) { errEl.textContent = 'Completa todos los campos'; return; }
+
+  // Mixed Content: página en HTTPS no puede llamar a servidor HTTP
+  if (location.protocol === 'https:' && url.startsWith('http:')) {
+    const httpsUrl = url.replace('http:', 'https:');
+    errEl.innerHTML =
+      'El servidor usa <b>http://</b> pero esta página es <b>https://</b>.<br>' +
+      'El navegador bloquea la conexi\u00f3n (Mixed Content).<br>' +
+      `Prueba con: <a href="#" id="lnkHttps" style="color:#e8304a">${esc(httpsUrl)}</a>`;
+    document.getElementById('lnkHttps')?.addEventListener('click', e => {
+      e.preventDefault(); $('loginUrl').value = httpsUrl;
+    });
+    return;
+  }
 
   errEl.textContent = '';
   btn.textContent   = 'Conectando...';
