@@ -213,9 +213,9 @@ body{background:#080a10}
 #playerOverlay.open{display:flex}
 #videoEl{width:100%;height:100%;background:#000}
 #playerHeader{
-  display:flex;align-items:center;padding:12px 16px;gap:12px;
+  display:flex;align-items:center;padding:12px 16px;gap:10px;
   background:linear-gradient(#000c,transparent);
-  position:absolute;top:0;left:0;right:0;z-index:1;pointer-events:none
+  position:absolute;top:0;left:0;right:0;z-index:2;pointer-events:none
 }
 #playerHeader *{pointer-events:all}
 #btnClosePlayer{background:none;border:none;color:#fff;font-size:26px;cursor:pointer;line-height:1}
@@ -223,6 +223,34 @@ body{background:#080a10}
   font-size:13px;color:#fff;flex:1;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap
 }
+#btnTracks{
+  display:none;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
+  color:#fff;font-size:15px;cursor:pointer;border-radius:6px;padding:4px 10px;
+  line-height:1.4;backdrop-filter:blur(4px)
+}
+#btnTracks:hover{background:rgba(255,255,255,.25)}
+/* Panel de pistas */
+#tracksPanel{
+  display:none;position:absolute;top:54px;right:12px;z-index:3;
+  background:rgba(8,10,18,.96);border:1px solid #2a2f3e;
+  border-radius:10px;padding:10px;min-width:180px;max-width:260px;
+  max-height:65vh;overflow-y:auto;backdrop-filter:blur(8px)
+}
+#tracksPanel.open{display:block}
+.trkSection{margin-bottom:10px}
+.trkSection:last-child{margin-bottom:0}
+.trkLabel{
+  font-size:10px;font-weight:700;color:#5c6478;letter-spacing:.07em;
+  text-transform:uppercase;padding:0 6px;margin-bottom:4px
+}
+.trkBtn{
+  display:block;width:100%;text-align:left;padding:8px 10px;
+  background:none;border:none;color:#9aa0b4;font-size:13px;
+  cursor:pointer;border-radius:6px;transition:.1s;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis
+}
+.trkBtn:hover{background:#1a1f2e;color:#e8eaf0}
+.trkBtn.active{background:rgba(232,48,74,.15);color:#e8304a;font-weight:600}
 
 /* ── LOADING / EMPTY ─────────────────────────────── */
 .loading{
@@ -404,6 +432,17 @@ body{background:#080a10}
   <div id="playerHeader">
     <button id="btnClosePlayer">&#10005;</button>
     <span id="playerTitle"></span>
+    <button id="btnTracks" title="Audio / Subtítulos">&#9881;</button>
+  </div>
+  <div id="tracksPanel">
+    <div class="trkSection" id="audioSection">
+      <div class="trkLabel">&#128266; Audio</div>
+      <div id="audioList"></div>
+    </div>
+    <div class="trkSection" id="subsSection">
+      <div class="trkLabel">CC Subtítulos</div>
+      <div id="subsList"></div>
+    </div>
   </div>
 </div>
 
@@ -493,10 +532,55 @@ function renderHistory() {
   } catch (_) { el.innerHTML = '<div class="emptyState">Sin reproducciones recientes</div>'; }
 }
 
+function updateTracksPanel() {
+  const hls = S.hls;
+  if (!hls) { $('btnTracks').style.display = 'none'; return; }
+
+  const audioTracks = hls.audioTracks || [];
+  const subTracks   = hls.subtitleTracks || [];
+  const hasOptions  = audioTracks.length > 1 || subTracks.length > 0;
+  $('btnTracks').style.display = hasOptions ? '' : 'none';
+
+  // Audio
+  const audioSec  = $('audioSection');
+  const audioList = $('audioList');
+  audioSec.style.display = audioTracks.length > 1 ? '' : 'none';
+  audioList.innerHTML = '';
+  audioTracks.forEach((t, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'trkBtn' + (i === hls.audioTrack ? ' active' : '');
+    btn.textContent = t.name || t.lang || `Audio ${i + 1}`;
+    btn.onclick = () => { hls.audioTrack = i; updateTracksPanel(); };
+    audioList.appendChild(btn);
+  });
+
+  // Subtitles
+  const subsSec  = $('subsSection');
+  const subsList = $('subsList');
+  subsSec.style.display = subTracks.length ? '' : 'none';
+  subsList.innerHTML = '';
+  const offBtn = document.createElement('button');
+  offBtn.className = 'trkBtn' + (hls.subtitleTrack === -1 ? ' active' : '');
+  offBtn.textContent = 'Desactivar';
+  offBtn.onclick = () => { hls.subtitleTrack = -1; updateTracksPanel(); };
+  subsList.appendChild(offBtn);
+  subTracks.forEach((t, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'trkBtn' + (i === hls.subtitleTrack ? ' active' : '');
+    btn.textContent = t.name || t.lang || `Sub ${i + 1}`;
+    btn.onclick = () => { hls.subtitleTrack = i; updateTracksPanel(); };
+    subsList.appendChild(btn);
+  });
+}
+
+function closeTracks() { $('tracksPanel').classList.remove('open'); }
+
 function play(url, title) {
   if (S.hls) { S.hls.destroy(); S.hls = null; }
   addHistory(url, title);
   playerTitle.textContent = title || '';
+  $('btnTracks').style.display = 'none';
+  closeTracks();
   playerOverlay.classList.add('open');
 
   const isHls = /\.m3u8|\/live\//i.test(url);
@@ -504,12 +588,57 @@ function play(url, title) {
     S.hls = new Hls({ enableWorker: true, lowLatencyMode: true });
     S.hls.loadSource(url);
     S.hls.attachMedia(videoEl);
-    S.hls.on(Hls.Events.MANIFEST_PARSED, () => videoEl.play().catch(() => {}));
+    S.hls.on(Hls.Events.MANIFEST_PARSED,         () => { videoEl.play().catch(() => {}); updateTracksPanel(); });
+    S.hls.on(Hls.Events.AUDIO_TRACKS_UPDATED,    updateTracksPanel);
+    S.hls.on(Hls.Events.SUBTITLE_TRACKS_UPDATED, updateTracksPanel);
   } else {
-    // Soporte nativo HLS (Safari/iOS) o fallback directo
     videoEl.src = url;
     videoEl.play().catch(() => {});
+    // Intentar pistas nativas (Safari/iOS)
+    videoEl.addEventListener('loadedmetadata', function onMeta() {
+      videoEl.removeEventListener('loadedmetadata', onMeta);
+      _updateNativeTracks();
+    }, { once: true });
   }
+}
+
+function _updateNativeTracks() {
+  const audioTracks = Array.from(videoEl.audioTracks || []);
+  const textTracks  = Array.from(videoEl.textTracks  || []);
+  const hasOptions  = audioTracks.length > 1 || textTracks.length > 0;
+  $('btnTracks').style.display = hasOptions ? '' : 'none';
+
+  const audioList = $('audioList');
+  const subsList  = $('subsList');
+  $('audioSection').style.display = audioTracks.length > 1 ? '' : 'none';
+  audioList.innerHTML = '';
+  audioTracks.forEach((t, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'trkBtn' + (t.enabled ? ' active' : '');
+    btn.textContent = t.label || t.language || `Audio ${i + 1}`;
+    btn.onclick = () => {
+      audioTracks.forEach(a => { a.enabled = false; });
+      t.enabled = true;
+      _updateNativeTracks();
+    };
+    audioList.appendChild(btn);
+  });
+
+  $('subsSection').style.display = textTracks.length ? '' : 'none';
+  subsList.innerHTML = '';
+  const offBtn = document.createElement('button');
+  const allOff = textTracks.every(t => t.mode === 'disabled');
+  offBtn.className = 'trkBtn' + (allOff ? ' active' : '');
+  offBtn.textContent = 'Desactivar';
+  offBtn.onclick = () => { textTracks.forEach(t => { t.mode = 'disabled'; }); _updateNativeTracks(); };
+  subsList.appendChild(offBtn);
+  textTracks.forEach((t, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'trkBtn' + (t.mode === 'showing' ? ' active' : '');
+    btn.textContent = t.label || t.language || `Sub ${i + 1}`;
+    btn.onclick = () => { textTracks.forEach(x => { x.mode = 'disabled'; }); t.mode = 'showing'; _updateNativeTracks(); };
+    subsList.appendChild(btn);
+  });
 }
 
 function closePlayer() {
@@ -517,10 +646,19 @@ function closePlayer() {
   videoEl.pause();
   videoEl.removeAttribute('src');
   videoEl.load();
+  closeTracks();
   playerOverlay.classList.remove('open');
 }
 
 $('btnClosePlayer').addEventListener('click', closePlayer);
+$('btnTracks').addEventListener('click', e => {
+  e.stopPropagation();
+  $('tracksPanel').classList.toggle('open');
+});
+$('tracksPanel').addEventListener('click', e => e.stopPropagation());
+playerOverlay.addEventListener('click', e => {
+  if ($('tracksPanel').classList.contains('open')) { closeTracks(); }
+});
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closePlayer(); closeModal(); } });
 
 // ═══════════════════════════════════════════════════
