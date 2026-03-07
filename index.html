@@ -455,6 +455,11 @@ function esc(s) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;')
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
+function proxyImg(url) {
+  if (!url) return '';
+  if (url.startsWith('http:') && S.proxy) return `${S.proxy.replace(/\/$/, '')}/${url}`;
+  return url;
+}
 
 function showLoading(el) {
   el.innerHTML = '<div class="loading"><div class="spinner"></div><span>Cargando...</span></div>';
@@ -518,7 +523,7 @@ function renderLive() {
     const item = document.createElement('div');
     item.className = 'channelItem';
     item.innerHTML =
-      `<img class="channelLogo" src="${esc(ch.stream_icon || '')}" alt=""
+      `<img class="channelLogo" src="${esc(proxyImg(ch.stream_icon || ''))}" alt=""
             loading="lazy" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'">
        <span class="channelName">${esc(ch.name || '')}</span>
        <div class="playIcon">&#9654;</div>`;
@@ -575,7 +580,7 @@ function renderMovies() {
     const card = document.createElement('div');
     card.className = 'mediaCard';
     card.innerHTML =
-      `<img class="mediaPoster" src="${esc(m.stream_icon || '')}" alt="" loading="lazy"
+      `<img class="mediaPoster" src="${esc(proxyImg(m.stream_icon || ''))}" alt="" loading="lazy"
             onerror="this.style.background='#1a1f2e'">
        <div class="mediaCardTitle">${esc(m.name || '')}</div>
        ${m.rating ? `<div class="mediaCardSub">&#9733; ${esc(m.rating)}</div>` : ''}`;
@@ -587,7 +592,7 @@ function renderMovies() {
 
 async function openMovieDetail(m) {
   $('modalTitle').textContent   = m.name || '';
-  $('modalBanner').src          = m.stream_icon || '';
+  $('modalBanner').src          = proxyImg(m.stream_icon || '');
   $('modalBanner').style.display = '';
   $('modalMeta').textContent    = '';
   $('modalDesc').textContent    = 'Cargando información...';
@@ -601,7 +606,7 @@ async function openMovieDetail(m) {
     const ext  = info.movie_data?.container_extension || 'mp4';
 
     const banner = (d.backdrop_path && d.backdrop_path[0]) || d.movie_image || m.stream_icon || '';
-    $('modalBanner').src = banner;
+    $('modalBanner').src = proxyImg(banner);
     $('modalMeta').textContent = [d.genre, (d.releasedate || '').slice(0, 4), d.rating ? `\u2605 ${d.rating}` : ''].filter(Boolean).join(' \u00b7 ');
     $('modalDesc').textContent = d.plot || d.description || 'Sin descripci\u00f3n.';
 
@@ -661,7 +666,7 @@ function renderSeries() {
     const card = document.createElement('div');
     card.className = 'mediaCard';
     card.innerHTML =
-      `<img class="mediaPoster" src="${esc(s.cover || '')}" alt="" loading="lazy"
+      `<img class="mediaPoster" src="${esc(proxyImg(s.cover || ''))}" alt="" loading="lazy"
             onerror="this.style.background='#1a1f2e'">
        <div class="mediaCardTitle">${esc(s.name || '')}</div>`;
     card.addEventListener('click', () => openSeriesDetail(s));
@@ -672,7 +677,7 @@ function renderSeries() {
 
 async function openSeriesDetail(s) {
   $('modalTitle').textContent   = s.name || '';
-  $('modalBanner').src          = s.cover || '';
+  $('modalBanner').src          = proxyImg(s.cover || '');
   $('modalBanner').style.display = '';
   $('modalMeta').textContent    = '';
   $('modalDesc').textContent    = 'Cargando...';
@@ -686,7 +691,7 @@ async function openSeriesDetail(s) {
     const episodes = info.episodes || {};
     const seasons  = info.seasons  || [];
 
-    $('modalBanner').src = d.backdrop_path || s.cover || '';
+    $('modalBanner').src = proxyImg(d.backdrop_path || s.cover || '');
     $('modalMeta').textContent = [d.genre, (d.releaseDate || '').slice(0, 4), d.rating ? `\u2605 ${d.rating}` : ''].filter(Boolean).join(' \u00b7 ');
     $('modalDesc').textContent = d.plot || d.description || '';
 
