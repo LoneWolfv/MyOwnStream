@@ -42,12 +42,9 @@ html,body{height:100%;background:#0f1117;color:#e8eaf0;font-family:-apple-system
 
 /* ── APP SHELL ────────────────────────────────────── */
 body{background:#080a10}
-#app{
-  display:none;flex-direction:column;height:100vh;
-  max-width:480px;margin:0 auto;
-  box-shadow:0 0 40px rgba(0,0,0,.8);
-  background:#0f1117
-}
+#app{display:none;flex-direction:column;height:100vh;background:#0f1117}
+/* sidebar transparent en móvil — header y tabBar fluyen directamente */
+#sidebar{display:contents}
 
 /* ── HEADER ──────────────────────────────────────── */
 #header{
@@ -232,8 +229,47 @@ body{background:#080a10}
 .emptyState{text-align:center;color:#5c6478;padding:48px 24px;font-size:14px;grid-column:1/-1}
 
 /* ── RESPONSIVE ──────────────────────────────────── */
-@media(min-width:480px){
-  .channelName{font-size:15px}
+
+/* ── DESKTOP: layout horizontal con sidebar ─────── */
+@media(min-width:700px){
+  #app{flex-direction:row;max-height:100vh}
+  #sidebar{
+    display:flex;flex-direction:column;flex-shrink:0;position:relative;
+    width:220px;background:#0d1017;
+    border-right:1px solid #1e2235;overflow:hidden
+  }
+  #header{
+    flex-direction:column;align-items:center;
+    padding:28px 16px 12px;border-bottom:1px solid #1e2235;
+    gap:6px;flex-shrink:0
+  }
+  #header .headerIcon{font-size:36px}
+  #header h2{font-size:14px;text-align:center;flex:none}
+  /* Logout fijo al fondo del sidebar */
+  #btnLogout{
+    position:absolute;bottom:12px;left:12px;right:12px;
+    border-color:#2a2f3e;color:#7a8096;font-size:12px;
+    padding:8px;text-align:center
+  }
+  /* Tabs verticales */
+  #tabBar{
+    flex-direction:column;border-bottom:none;
+    padding:8px 8px 56px;gap:2px;flex:1;overflow-y:auto
+  }
+  .tab{
+    text-align:left;padding:11px 14px;font-size:13px;
+    border-bottom:none;border-radius:8px;
+    margin-bottom:1px
+  }
+  .tab.active{background:#1a1f2e;border-bottom-color:transparent}
+  /* Área principal */
+  #content{flex:1;min-width:0;height:100vh}
+  /* Grid con más columnas en escritorio */
+  .mediaGrid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+  /* Modal centrado */
+  .modal.open{display:flex;align-items:flex-start;justify-content:center;padding:24px}
+  .modalCard{max-width:600px;width:100%;border-radius:12px;min-height:unset;border:1px solid #2a2f3e}
+  .modalBanner{max-height:260px;border-radius:12px 12px 0 0}
 }
 </style>
 </head>
@@ -271,18 +307,19 @@ body{background:#080a10}
 <!-- ═══════════════════════════════════════════════ -->
 <div id="app">
 
-  <div id="header">
-    <span style="font-size:20px">📺</span>
-    <h2>My Own Stream</h2>
-    <button id="btnLogout">Salir</button>
-  </div>
-
-  <div id="tabBar">
-    <button class="tab active" data-tab="live">📡 En Vivo</button>
-    <button class="tab"        data-tab="movies">🎬 Películas</button>
-    <button class="tab"        data-tab="series">🎭 Series</button>
-    <button class="tab"        data-tab="history">📜 Historial</button>
-  </div>
+  <aside id="sidebar">
+    <div id="header">
+      <span class="headerIcon" style="font-size:20px">📺</span>
+      <h2>My Own Stream</h2>
+      <button id="btnLogout">Salir</button>
+    </div>
+    <div id="tabBar">
+      <button class="tab active" data-tab="live">📡 En Vivo</button>
+      <button class="tab"        data-tab="movies">🎬 Películas</button>
+      <button class="tab"        data-tab="series">🎭 Series</button>
+      <button class="tab"        data-tab="history">📜 Historial</button>
+    </div>
+  </aside>
 
   <div id="content">
 
