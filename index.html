@@ -760,14 +760,15 @@ async function doLogin() {
 
   // Mixed Content: página en HTTPS no puede llamar a servidor HTTP
   if (location.protocol === 'https:' && url.startsWith('http:')) {
-    const httpsUrl = url.replace('http:', 'https:');
     errEl.innerHTML =
-      'El servidor usa <b>http://</b> pero esta página es <b>https://</b>.<br>' +
-      'El navegador bloquea la conexi\u00f3n (Mixed Content).<br>' +
-      `Prueba con: <a href="#" id="lnkHttps" style="color:#e8304a">${esc(httpsUrl)}</a>`;
-    document.getElementById('lnkHttps')?.addEventListener('click', e => {
-      e.preventDefault(); $('loginUrl').value = httpsUrl;
-    });
+      'Tu servidor usa <b>http://</b> (sin SSL).<br>' +
+      'Para conectar tienes dos opciones:<br><br>' +
+      '<b>Opci\u00f3n 1 \u2014 Abrir el archivo local:</b><br>' +
+      'Abre <code style="background:#1a1f2e;padding:2px 6px;border-radius:4px">docs/index.html</code> ' +
+      'directamente desde tu computadora (doble clic) \u2014 sin restricciones.<br><br>' +
+      '<b>Opci\u00f3n 2 \u2014 Permitir en Chrome:</b><br>' +
+      'Configuraci\u00f3n \u2192 Privacidad \u2192 Configuraci\u00f3n del sitio \u2192 ' +
+      'Contenido no seguro \u2192 Agregar <b>lonewolfv.github.io</b>';
     return;
   }
 
