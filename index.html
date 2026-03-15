@@ -136,18 +136,25 @@ body{background:#080a10}
 .mediaCard:hover{background:#161a24}
 .mediaCard:active{background:#1a1f2e}
 .mediaAvatar{
-  width:38px;height:38px;border-radius:8px;flex-shrink:0;
+  width:46px;height:69px;border-radius:6px;flex-shrink:0;
   background:linear-gradient(135deg,#1e2540,#0d1018);
   border:1px solid #1e2235;
   display:flex;align-items:center;justify-content:center;
-  font-size:16px;font-weight:900;color:rgba(255,255,255,.25);text-transform:uppercase
+  font-size:18px;font-weight:900;color:rgba(255,255,255,.25);text-transform:uppercase;
+  overflow:hidden;position:relative
+}
+.mediaAvatar img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block
 }
 .mediaItemBody{flex:1;min-width:0}
 .mediaItemName{
   font-size:14px;color:#e8eaf0;font-weight:600;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px
 }
-.mediaItemMeta{font-size:11px;color:#5c6478}
+.mediaItemMeta{font-size:11px;color:#5c6478;margin-bottom:1px}
+.mediaItemGenre{font-size:11px;color:#4a7090;min-height:0}
+.mediaItemCast{font-size:10px;color:#3a4a5a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:0}
+.mediaItemPlot{font-size:10px;color:#3a4255;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .mediaItemArrow{color:#2a2f3e;font-size:20px;flex-shrink:0;line-height:1}
 
 /* ── NOVEDADES sub-tabs ───────────────────────────── */
@@ -274,6 +281,111 @@ body{background:#080a10}
 .epNum{font-size:11px;color:#5c6478;font-weight:bold;min-width:28px}
 .epTitle{font-size:13px;color:#e8eaf0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .epPlay{font-size:14px;color:#e8304a}
+
+/* ── EN VIVO — LAYOUT 3 PANELES ─────────────────── */
+.liveLayout{
+  display:flex;flex:1;overflow:hidden;height:100%
+}
+/* Sidebar categorías */
+.liveSidebar{
+  width:180px;flex-shrink:0;display:flex;flex-direction:column;
+  background:#0a0c12;border-right:1px solid #1e2235;overflow:hidden
+}
+.liveSidebarTitle{
+  padding:14px 12px 10px;font-size:13px;font-weight:bold;
+  color:#e8304a;letter-spacing:.06em;flex-shrink:0;
+  background:#0d1018;border-bottom:1px solid #1e2235
+}
+.liveCatList{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch
+}
+.liveCatList::-webkit-scrollbar{width:3px}
+.liveCatList::-webkit-scrollbar-thumb{background:#2a2f3e}
+.liveCatItem{
+  padding:10px 14px;font-size:12px;color:#7a8096;cursor:pointer;
+  border-left:3px solid transparent;transition:.1s;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.liveCatItem:hover{background:#111520;color:#c0c4d0}
+.liveCatItem.active{
+  color:#e8eaf0;font-weight:bold;
+  border-left-color:#e8304a;background:#111827
+}
+/* Panel central */
+.liveCenter{
+  flex:1;display:flex;flex-direction:column;overflow:hidden;
+  border-right:1px solid #1e2235
+}
+.liveSearchBar{padding:10px 12px;flex-shrink:0;background:#0d1017}
+.liveSearchBar input{
+  width:100%;box-sizing:border-box;background:#161a24;border:1px solid #2a2f3e;
+  border-radius:8px;padding:8px 12px;color:#e8eaf0;font-size:13px;outline:none
+}
+.liveSearchBar input:focus{border-color:#e8304a}
+.liveChannelList{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch
+}
+.liveChannelList::-webkit-scrollbar{width:3px}
+.liveChannelList::-webkit-scrollbar-thumb{background:#2a2f3e}
+/* Items canal */
+.channelItem{
+  display:flex;align-items:center;gap:10px;padding:9px 12px;
+  cursor:pointer;border-bottom:1px solid #111520;transition:.1s
+}
+.channelItem:hover,.channelItem.active{background:#161a24}
+.channelItem.active{border-left:3px solid #e8304a}
+.channelLogo{
+  width:36px;height:36px;object-fit:contain;border-radius:4px;
+  background:#0f1117;flex-shrink:0
+}
+.channelName{font-size:12px;color:#c0c4d0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.channelFavBtn{
+  background:none;border:none;cursor:pointer;font-size:15px;
+  padding:4px 6px;flex-shrink:0;line-height:1;opacity:.3;transition:.15s;color:#e8304a
+}
+.channelFavBtn:hover{opacity:.8}
+.channelFavBtn.active{opacity:1}
+/* Panel derecho: mini-player */
+.livePreview{
+  width:320px;flex-shrink:0;display:flex;flex-direction:column;
+  background:#0d1017;overflow:hidden
+}
+.livePreviewPlayer{
+  position:relative;aspect-ratio:16/9;background:#000;flex-shrink:0
+}
+.livePreviewOverlay{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center
+}
+.livePreviewInfo{
+  padding:12px;flex:1;display:flex;flex-direction:column;gap:10px
+}
+.livePreviewName{
+  font-size:14px;font-weight:bold;color:#e8eaf0;line-height:1.4
+}
+.livePreviewBtn{
+  background:#e8304a;color:#fff;border:none;border-radius:8px;
+  padding:10px;font-size:13px;font-weight:bold;cursor:pointer;width:100%
+}
+.livePreviewBtn:hover{background:#c5263d}
+.livePreviewFavBtn{
+  background:#1e2235;color:#9aa0b4;border:1px solid #2a2f3e;border-radius:8px;
+  padding:8px;font-size:13px;cursor:pointer;width:100%;transition:.15s
+}
+.livePreviewFavBtn:hover{background:#2a2f3e}
+.livePreviewFavBtn.active{background:#2d1a1f;border-color:#e8304a;color:#e8304a}
+/* Mobile: ocultar sidebar y preview, volver a layout vertical */
+@media(max-width:700px){
+  .liveLayout{flex-direction:column}
+  .liveSidebar{width:100%;height:auto;flex-direction:row;border-right:none;border-bottom:1px solid #1e2235}
+  .liveSidebarTitle{display:none}
+  .liveCatList{display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;padding:6px}
+  .liveCatList::-webkit-scrollbar{display:none}
+  .liveCatItem{padding:6px 12px;border-left:none;border-bottom:3px solid transparent;white-space:nowrap;flex-shrink:0}
+  .liveCatItem.active{border-bottom-color:#e8304a;border-left-color:transparent}
+  .liveCenter{border-right:none}
+  .livePreview{display:none}
+}
 
 /* ── PLAYER ──────────────────────────────────────── */
 #playerOverlay{
@@ -425,11 +537,44 @@ body{background:#080a10}
 
     <!-- EN VIVO -->
     <div id="paneLive" class="tabPane active">
-      <div class="searchWrap">
-        <input id="searchLive" type="search" placeholder="Buscar canal...">
+      <div class="liveLayout">
+
+        <!-- Panel izquierdo: categorías -->
+        <div class="liveSidebar">
+          <div class="liveSidebarTitle">📡 EN VIVO</div>
+          <div id="catLive" class="liveCatList"></div>
+        </div>
+
+        <!-- Panel central: búsqueda + canales -->
+        <div class="liveCenter">
+          <div class="liveSearchBar">
+            <input id="searchLive" type="search" placeholder="🔍 Buscar canal...">
+          </div>
+          <div id="listLive" class="liveChannelList"></div>
+        </div>
+
+        <!-- Panel derecho: mini-player + info canal -->
+        <div class="livePreview" id="livePreview">
+          <div class="livePreviewPlayer" id="livePreviewPlayer">
+            <video id="livePreviewVideo" autoplay muted playsinline
+                   style="width:100%;height:100%;object-fit:contain;background:#000"></video>
+            <div class="livePreviewOverlay" id="livePreviewOverlay">
+              <div style="font-size:32px;opacity:.3">📺</div>
+              <div style="font-size:12px;color:#5c6478;margin-top:8px">Selecciona un canal</div>
+            </div>
+          </div>
+          <div class="livePreviewInfo" id="livePreviewInfo">
+            <div class="livePreviewName" id="livePreviewName">—</div>
+            <button class="livePreviewBtn" id="livePreviewPlayBtn" style="display:none">
+              ▶ Ver en pantalla completa
+            </button>
+            <button class="livePreviewFavBtn" id="livePreviewFavBtn" style="display:none">
+              ♡ Agregar a favoritos
+            </button>
+          </div>
+        </div>
+
       </div>
-      <div id="catLive" class="catBar"></div>
-      <div id="listLive" class="itemList"></div>
     </div>
 
     <!-- PELÍCULAS -->
@@ -692,21 +837,113 @@ function buildCatBar(containerId, cats, activeId, onSelect, extraChips = []) {
     el.appendChild(chip);
   });
 }
-function makeCard(name, iconUrl, rating, onClick, year) {
+function makeCard(name, iconUrl, rating, onClick, year, genre, cast, plot, tmdbId, mediaType) {
   const card = document.createElement('div');
   card.className = 'mediaCard';
   const initial = (name || '?').trim()[0].toUpperCase();
-  const extractedYear = year || ((name||'').match(/\((\d{4})\)/) || [])[1] || '';
+  const extractedYear = year
+    ? String(year).slice(0, 4)
+    : ((name||'').match(/\((\d{4})\)/) || [])[1] || '';
   const metaParts = [rating ? `★ ${rating}` : '', extractedYear].filter(Boolean);
+  const genreText = genre
+    ? genre.split(/[,/]/).map(g => g.trim()).filter(Boolean).slice(0, 2).join(' · ')
+    : '';
+  const castText = cast
+    ? cast.split(',').map(c => c.trim()).filter(Boolean).slice(0, 3).join(', ')
+    : '';
+  // Plot corto como fallback si no hay género/cast
+  const plotShort = (!genreText && !castText && plot)
+    ? plot.replace(/\s+/g, ' ').trim().slice(0, 90) + (plot.length > 90 ? '…' : '')
+    : '';
+  const imgHtml = iconUrl
+    ? `<img src="${esc(proxyImg(iconUrl))}" alt="" loading="lazy"
+            onerror="this.remove()">`
+    : '';
   card.innerHTML =
-    `<div class="mediaAvatar">${esc(initial)}</div>
+    `<div class="mediaAvatar">${esc(initial)}${imgHtml}</div>
      <div class="mediaItemBody">
        <div class="mediaItemName">${esc(name || '')}</div>
        ${metaParts.length ? `<div class="mediaItemMeta">${esc(metaParts.join(' · '))}</div>` : ''}
+       <div class="mediaItemGenre" data-genre></div>
+       <div class="mediaItemCast"  data-cast></div>
+       ${plotShort ? `<div class="mediaItemPlot">${esc(plotShort)}</div>` : ''}
      </div>
      <div class="mediaItemArrow">›</div>`;
+  // Llenar con datos ya disponibles
+  if (genreText) card.querySelector('[data-genre]').textContent = genreText;
+  if (castText)  card.querySelector('[data-cast]').textContent  = castText;
+  // Lazy TMDB: enriquecer cuando entre en pantalla
+  if (!genreText && !castText && mediaType) {
+    lazyEnrichCard(card, tmdbId, mediaType, name, extractedYear);
+  }
   card.addEventListener('click', onClick);
   return card;
+}
+
+// Cola de enriquecimiento TMDB (máx 2 peticiones simultáneas, 300ms entre ellas)
+const _enrichQueue = [];
+let _enrichRunning = 0;
+const _enrichCache  = {};
+
+function lazyEnrichCard(card, tmdbId, mediaType, title, year) {
+  const io = new IntersectionObserver(entries => {
+    if (!entries[0].isIntersecting) return;
+    io.disconnect();
+    _enrichQueue.push({ card, tmdbId, mediaType, title, year });
+    _drainEnrich();
+  }, { rootMargin: '200px' });
+  io.observe(card);
+}
+
+function _drainEnrich() {
+  if (_enrichRunning >= 2 || !_enrichQueue.length) return;
+  const { card, tmdbId, mediaType, title, year } = _enrichQueue.shift();
+  _enrichRunning++;
+
+  // Clave de caché: por tmdbId si existe, o por título limpio
+  const cleanTitle = (title||'')
+    .replace(/\[[^\]]*\]/g, '').replace(/\([^)]*\)/g, '').trim();
+  const cacheKey = tmdbId > 0 ? `${mediaType}:${tmdbId}` : `${mediaType}:${cleanTitle}`;
+
+  const applyData = data => {
+    if (!data || !card.isConnected) return;
+    const gEl = card.querySelector('[data-genre]');
+    const cEl = card.querySelector('[data-cast]');
+    const pEl = card.querySelector('.mediaItemPlot');
+    const g = (data.genres||[]).slice(0, 2).map(x => x.name).join(' · ');
+    const c = (data.credits?.cast||[]).slice(0, 3).map(x => x.name).join(', ');
+    if (gEl && g) { gEl.textContent = g; if (pEl) pEl.remove(); }
+    if (cEl && c)   cEl.textContent = c;
+  };
+
+  if (_enrichCache[cacheKey] !== undefined) {
+    applyData(_enrichCache[cacheKey]);
+    _enrichRunning--;
+    setTimeout(_drainEnrich, 0);
+    return;
+  }
+
+  // Resolver tmdbId: directo si existe, búsqueda por título si no
+  const resolveAndFetch = (resolvedId) => {
+    const path = mediaType === 'movie'
+      ? `/movie/${resolvedId}?append_to_response=credits`
+      : `/tv/${resolvedId}?append_to_response=credits`;
+    return tmdbGet(path);
+  };
+
+  const run = tmdbId > 0
+    ? resolveAndFetch(tmdbId)
+    : tmdbGet(`/${mediaType === 'movie' ? 'search/movie' : 'search/tv'}?query=${encodeURIComponent(cleanTitle)}${year ? '&year=' + year : ''}`)
+        .then(r => {
+          const id = (r.results||[])[0]?.id;
+          if (!id) throw new Error('not found');
+          return resolveAndFetch(id);
+        });
+
+  run
+    .then(d  => { _enrichCache[cacheKey] = d; applyData(d); })
+    .catch(() => { _enrichCache[cacheKey] = null; })
+    .finally(() => { _enrichRunning--; setTimeout(_drainEnrich, 120); });
 }
 
 // ═══════════════════════════════════════════════════
@@ -716,13 +953,29 @@ const videoEl       = $('videoEl');
 const playerOverlay = $('playerOverlay');
 const playerTitle   = $('playerTitle');
 
-function addHistory(url, title) {
+function addHistory(url, title, img) {
   try {
     const h = JSON.parse(localStorage.getItem('iptv_history') || '[]');
     const filtered = h.filter(x => x.url !== url);
-    filtered.unshift({ title, url, time: Date.now() });
+    filtered.unshift({ title, url, img: img||'', time: Date.now() });
     localStorage.setItem('iptv_history', JSON.stringify(filtered.slice(0, 50)));
   } catch (_) {}
+}
+
+function findHistoryImg(item) {
+  if (item.img) return item.img;
+  // Extraer el ID numérico del URL para buscar en los índices cargados
+  const liveM = /\/live\/[^/]+\/[^/]+\/(\d+)/.exec(item.url);
+  if (liveM) return S.live.streams.find(s => s.stream_id === +liveM[1])?.stream_icon || '';
+  const vodM = /\/movie\/[^/]+\/[^/]+\/(\d+)/.exec(item.url);
+  if (vodM)  return S.movies.streams.find(s => s.stream_id === +vodM[1])?.stream_icon || '';
+  const serM = /\/series\/[^/]+\/[^/]+\/(\d+)/.exec(item.url);
+  if (serM) {
+    // El título de episodio es "SeriesName · ENN …" — tomar el prefijo
+    const name = item.title.split(' · ')[0];
+    return S.series.list.find(s => s.name === name)?.cover || '';
+  }
+  return '';
 }
 
 function renderHistory() {
@@ -737,13 +990,23 @@ function renderHistory() {
       div.className = 'channelItem';
       const d = new Date(item.time);
       const ts = d.toLocaleDateString('es',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+      const imgSrc = findHistoryImg(item);
+      const thumbHtml = imgSrc
+        ? `<img src="${esc(proxyImg(imgSrc))}" alt="" loading="lazy"
+               style="width:46px;height:46px;object-fit:cover;border-radius:6px;background:#141820;flex-shrink:0"
+               onerror="this.style.display='none'">`
+        : `<div style="width:46px;height:46px;border-radius:6px;flex-shrink:0;
+               background:linear-gradient(135deg,#1e2540,#0d1018);
+               display:flex;align-items:center;justify-content:center;
+               font-size:18px;font-weight:900;color:rgba(255,255,255,.22)">${esc((item.title||'?')[0].toUpperCase())}</div>`;
       div.innerHTML =
-        `<div style="flex:1;overflow:hidden">
+        `${thumbHtml}
+         <div style="flex:1;overflow:hidden">
            <div class="channelName">${esc(item.title)}</div>
            <div style="font-size:11px;color:#5c6478;margin-top:2px">${ts}</div>
          </div>
          <div class="playIcon">&#9654;</div>`;
-      div.addEventListener('click', () => play(item.url, item.title));
+      div.addEventListener('click', () => play(item.url, item.title, item.img||''));
       frag.appendChild(div);
     });
     el.appendChild(frag);
@@ -823,9 +1086,9 @@ function updateNativeTracksPanel() {
   });
 }
 
-function play(url, title) {
+function play(url, title, img) {
   if (S.hls) { S.hls.destroy(); S.hls = null; }
-  addHistory(url, title);
+  addHistory(url, title, img||'');
   playerTitle.textContent = title || '';
   $('btnTracks').style.display = 'none';
   closeTracks();
@@ -991,13 +1254,87 @@ async function loadLive() {
 }
 
 function renderLiveCats() {
-  buildCatBar('catLive', S.live.cats, S.live.activeCat, id => { S.live.activeCat = id; renderLiveCats(); renderLive(); });
+  const el = $('catLive');
+  el.innerHTML = '';
+  // "⭐ Favoritos" si hay alguno guardado
+  const favIds = Favs.get('live');
+  if (favIds.length) {
+    const fav = document.createElement('div');
+    fav.className = 'liveCatItem' + (S.live.activeCat === 'favs' ? ' active' : '');
+    fav.textContent = '⭐ Favoritos';
+    fav.onclick = () => { S.live.activeCat = 'favs'; renderLiveCats(); renderLive(); };
+    el.appendChild(fav);
+  } else if (S.live.activeCat === 'favs') {
+    // si se borró el último fav, volver a "all"
+    S.live.activeCat = 'all';
+  }
+  // "Todos"
+  const all = document.createElement('div');
+  all.className = 'liveCatItem' + (S.live.activeCat === 'all' ? ' active' : '');
+  all.textContent = 'Todos';
+  all.onclick = () => { S.live.activeCat = 'all'; renderLiveCats(); renderLive(); };
+  el.appendChild(all);
+  S.live.cats.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'liveCatItem' + (S.live.activeCat === c.category_id ? ' active' : '');
+    div.textContent = c.category_name;
+    div.onclick = () => { S.live.activeCat = c.category_id; renderLiveCats(); renderLive(); };
+    el.appendChild(div);
+  });
+}
+
+let _livePreviewHls = null;
+
+function playLivePreview(ch) {
+  // Marcar activo
+  document.querySelectorAll('.channelItem').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.channelItem[data-id="${ch.stream_id}"]`)?.classList.add('active');
+  // Info panel
+  $('livePreviewName').textContent = ch.name || '';
+  $('livePreviewOverlay').style.display = 'none';
+  $('livePreviewPlayBtn').style.display = '';
+  $('livePreviewPlayBtn').onclick = () => play(api.liveUrl(ch.stream_id), ch.name, ch.stream_icon||'');
+  // Fav button
+  const pfb = $('livePreviewFavBtn');
+  pfb._chId = ch.stream_id;
+  pfb.style.display = '';
+  const initFav = Favs.has('live', ch.stream_id);
+  pfb.textContent = initFav ? '❤️ En favoritos' : '♡ Agregar a favoritos';
+  pfb.className = 'livePreviewFavBtn' + (initFav ? ' active' : '');
+  pfb.onclick = () => {
+    Favs.toggle('live', ch.stream_id);
+    const nowFav = Favs.has('live', ch.stream_id);
+    pfb.textContent = nowFav ? '❤️ En favoritos' : '♡ Agregar a favoritos';
+    pfb.className = 'livePreviewFavBtn' + (nowFav ? ' active' : '');
+    // Sync inline button
+    const inlineBtn = document.querySelector(`.channelFavBtn[data-fav="${ch.stream_id}"]`);
+    if (inlineBtn) { inlineBtn.textContent = nowFav ? '❤' : '♡'; inlineBtn.classList.toggle('active', nowFav); }
+    renderLiveCats();
+    if (S.live.activeCat === 'favs' && !nowFav) renderLive();
+  };
+  // Mini player
+  const video = $('livePreviewVideo');
+  const url   = api.liveUrl(ch.stream_id);
+  if (_livePreviewHls) { _livePreviewHls.destroy(); _livePreviewHls = null; }
+  if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+    _livePreviewHls = new Hls({ enableWorker:true, lowLatencyMode:true, maxBufferLength:10 });
+    _livePreviewHls.loadSource(url);
+    _livePreviewHls.attachMedia(video);
+    _livePreviewHls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(()=>{}));
+  } else {
+    video.src = url; video.play().catch(()=>{});
+  }
 }
 
 function renderLive() {
   const q = S.live.search.toLowerCase();
   let list = S.live.streams;
-  if (S.live.activeCat !== 'all') list = list.filter(s => s.category_id === S.live.activeCat);
+  if (S.live.activeCat === 'favs') {
+    const favIds = Favs.get('live');
+    list = favIds.map(id => S.live.streams.find(s => s.stream_id === id)).filter(Boolean);
+  } else if (S.live.activeCat !== 'all') {
+    list = list.filter(s => s.category_id === S.live.activeCat);
+  }
   if (q) list = list.filter(s => (s.name||'').toLowerCase().includes(q));
   const el = $('listLive');
   if (!list.length) { el.innerHTML = '<div class="emptyState">Sin canales</div>'; return; }
@@ -1006,12 +1343,35 @@ function renderLive() {
   list.forEach(ch => {
     const item = document.createElement('div');
     item.className = 'channelItem';
+    item.dataset.id = ch.stream_id;
+    const isFav = Favs.has('live', ch.stream_id);
     item.innerHTML =
       `<img class="channelLogo" src="${esc(proxyImg(ch.stream_icon||''))}" alt="" loading="lazy"
-            onerror="this.src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'">
+            onerror="this.style.visibility='hidden'">
        <span class="channelName">${esc(ch.name||'')}</span>
-       <div class="playIcon">&#9654;</div>`;
-    item.addEventListener('click', () => play(api.liveUrl(ch.stream_id), ch.name));
+       <button class="channelFavBtn${isFav?' active':''}" data-fav="${ch.stream_id}" title="${isFav?'Quitar de favoritos':'Agregar a favoritos'}">${isFav?'❤':'♡'}</button>`;
+    // Desktop: preview en panel derecho. Mobile: play directo
+    item.addEventListener('click', e => {
+      if (e.target.closest('.channelFavBtn')) return; // delegado abajo
+      if (window.innerWidth > 700) playLivePreview(ch);
+      else play(api.liveUrl(ch.stream_id), ch.name, ch.stream_icon||'');
+    });
+    item.querySelector('.channelFavBtn').addEventListener('click', e => {
+      e.stopPropagation();
+      Favs.toggle('live', ch.stream_id);
+      const nowFav = Favs.has('live', ch.stream_id);
+      e.currentTarget.textContent = nowFav ? '❤' : '♡';
+      e.currentTarget.classList.toggle('active', nowFav);
+      e.currentTarget.title = nowFav ? 'Quitar de favoritos' : 'Agregar a favoritos';
+      // Sync botón en preview panel si es el canal activo
+      const pfb = $('livePreviewFavBtn');
+      if (pfb && pfb._chId === ch.stream_id) {
+        pfb.textContent = nowFav ? '❤️ En favoritos' : '♡ Agregar a favoritos';
+        pfb.className = 'livePreviewFavBtn' + (nowFav ? ' active' : '');
+      }
+      renderLiveCats();
+      if (S.live.activeCat === 'favs' && !nowFav) renderLive();
+    });
     frag.appendChild(item);
   });
   el.appendChild(frag);
@@ -1076,7 +1436,7 @@ function appendMoviesPage() {
   const el = $('gridMovies');
   el.querySelector('.gridSentinel')?.remove();
   const frag = document.createDocumentFragment();
-  slice.forEach(m => frag.appendChild(makeCard(m.name, m.stream_icon, m.rating, () => openMovieDetail(m))));
+  slice.forEach(m => frag.appendChild(makeCard(m.name, m.stream_icon, m.rating, () => openMovieDetail(m), m.releasedate||m.release_date, m.genre, m.cast, m.plot, m.tmdb_id||0, 'movie')));
   el.appendChild(frag);
   S.movies.offset += slice.length;
   if (S.movies.offset < filtered.length) {
@@ -1132,7 +1492,7 @@ async function openMovieDetail(m) {
     renderCast(parseCastXtream(d.actors || d.cast_info, d.cast));
     $('btnModalFav').style.display  = '';
     $('btnModalPlay').style.display = '';
-    $('btnModalPlay').onclick = () => { closeModal(); play(api.vodUrl(m.stream_id, ext), m.name); };
+    $('btnModalPlay').onclick = () => { closeModal(); play(api.vodUrl(m.stream_id, ext), m.name, m.stream_icon||''); };
     if (d.youtube_trailer) {
       $('btnModalTrailer').style.display = '';
       $('btnModalTrailer').onclick = () => window.open(`https://www.youtube.com/watch?v=${d.youtube_trailer}`, '_blank');
@@ -1144,7 +1504,7 @@ async function openMovieDetail(m) {
     $('modalDesc').textContent      = 'Sin información adicional.';
     $('btnModalFav').style.display  = '';
     $('btnModalPlay').style.display = '';
-    $('btnModalPlay').onclick = () => { closeModal(); play(api.vodUrl(m.stream_id), m.name); };
+    $('btnModalPlay').onclick = () => { closeModal(); play(api.vodUrl(m.stream_id), m.name, m.stream_icon||''); };
   }
 }
 
@@ -1205,7 +1565,7 @@ function appendSeriesPage() {
   const el = $('gridSeries');
   el.querySelector('.gridSentinel')?.remove();
   const frag = document.createDocumentFragment();
-  slice.forEach(s => frag.appendChild(makeCard(s.name, s.cover, s.rating, () => openSeriesDetail(s))));
+  slice.forEach(s => frag.appendChild(makeCard(s.name, s.cover, s.rating, () => openSeriesDetail(s), s.releaseDate||s.release_date, s.genre, s.cast, s.plot, s.tmdb_id||0, 'tv')));
   el.appendChild(frag);
   S.series.offset += slice.length;
   if (S.series.offset < filtered.length) {
@@ -1266,7 +1626,7 @@ async function openSeriesDetail(s) {
     // Temporadas
     const seasonKeys = Object.keys(episodes).sort((a,b) => Number(a)-Number(b));
     if (seasonKeys.length > 0) {
-      S.seriesCtx = { info: seriesInfo, seasonKeys, seasons, activeSeason: seasonKeys[0], seriesName: s.name || '' };
+      S.seriesCtx = { info: seriesInfo, seasonKeys, seasons, activeSeason: seasonKeys[0], seriesName: s.name || '', seriesCover: s.cover || '' };
       $('seasonsSection').style.display = '';
       renderSeasonTabs();
       renderEpisodes(episodes[seasonKeys[0]] || []);
@@ -1306,7 +1666,7 @@ function renderEpisodes(eps) {
     item.addEventListener('click', () => {
       const ext = ep.container_extension || 'mp4';
       closeModal();
-      play(api.seriesEpUrl(ep.id, ext), `${S.seriesCtx.seriesName} · E${ep.episode_num} ${title}`);
+      play(api.seriesEpUrl(ep.id, ext), `${S.seriesCtx.seriesName} · E${ep.episode_num} ${title}`, S.seriesCtx.seriesCover||'');
     });
     el.appendChild(item);
   });
@@ -1499,6 +1859,11 @@ function doLogout() {
   ['iptv_s','iptv_u','iptv_p','iptv_exp'].forEach(k => localStorage.removeItem(k));
   S.server = ''; S.user = ''; S.pass = '';
   S.activeTab = 'live';
+  if (_livePreviewHls) { _livePreviewHls.destroy(); _livePreviewHls = null; }
+  const pv = $('livePreviewVideo'); pv.pause(); pv.removeAttribute('src'); pv.load();
+  $('livePreviewOverlay').style.display = ''; $('livePreviewPlayBtn').style.display = 'none';
+  $('livePreviewFavBtn').style.display = 'none';
+  $('livePreviewName').textContent = '—';
   S.live.loaded   = false; S.live.streams   = []; S.live.cats   = []; S.live.search   = ''; S.live.activeCat   = 'all';
   if (S.movies.io) { S.movies.io.disconnect(); S.movies.io = null; }
   S.movies.loaded = false; S.movies.streams = []; S.movies.cats = []; S.movies.search = ''; S.movies.activeCat = 'all'; S.movies.filtered = []; S.movies.offset = 0;
