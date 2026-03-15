@@ -498,6 +498,9 @@ body{background:#080a10}
       <div id="castSection" style="display:none;margin-bottom:16px">
         <div class="sectionLabel">Reparto</div>
         <div class="castScroll" id="castList"></div>
+        <div style="font-size:9px;color:#2a2f3e;margin-top:6px">
+          This product uses the TMDB API but is not endorsed or certified by TMDB.
+        </div>
       </div>
 
       <!-- Botones de acción -->
@@ -546,6 +549,22 @@ body{background:#080a10}
 //  ESTADO GLOBAL
 // ═══════════════════════════════════════════════════
 const PROXY = 'https://myownstream.lone-wolf-verified.workers.dev';
+
+// ── TMDB ────────────────────────────────────────────
+const TMDB_BASE  = 'https://api.themoviedb.org/3';
+const TMDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3NjgwZGMwOTY3MmIxNmIwZGJiN2E5YTBjMmNjNzY4NiIsIm5iZiI6MTc3MzU5NDE4Ni41NDU5OTk4LCJzdWIiOiI2OWI2ZTY0YTE3MjEyOTNjMjJhNjM2MWUiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.p3oBHVojQXgE5osPsfgaPAvHsuhdrcT7X49YMppk-W8';
+const TMDB_POSTER  = 'https://image.tmdb.org/t/p/w500';
+const TMDB_BACK    = 'https://image.tmdb.org/t/p/w780';
+const TMDB_CAST    = 'https://image.tmdb.org/t/p/w185';
+
+async function tmdbGet(path) {
+  const r = await fetch(
+    `${TMDB_BASE}${path}${path.includes('?')?'&':'?'}language=es-MX`,
+    { headers: { Authorization: `Bearer ${TMDB_TOKEN}` } }
+  );
+  if (!r.ok) throw new Error('tmdb ' + r.status);
+  return r.json();
+}
 
 const PAGE_SIZE = 30;
 
@@ -859,34 +878,18 @@ function closeModal() { modal.classList.remove('open'); S.modalCtx = { type:null
 $('btnCloseModal').addEventListener('click', closeModal);
 modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
-const TMDB_IMG = 'https://image.tmdb.org/t/p/w185';
-
-function renderCast(actors, castStr) {
+function renderCast(items) {
   const section = $('castSection');
   const el      = $('castList');
   el.innerHTML  = '';
-  let items = [];
-  // Formato array con fotos (TMDB via Xtream)
-  if (Array.isArray(actors) && actors.length) {
-    items = actors.slice(0, 20).map(a => ({
-      name: a.name || a.actor_name || '',
-      character: a.character || a.actor_character || '',
-      photo: a.profile_path ? TMDB_IMG + a.profile_path : (a.actor_photo || '')
-    }));
-  } else if (typeof castStr === 'string' && castStr.trim()) {
-    // Formato string CSV: "Actor1, Actor2, ..."
-    items = castStr.split(',').slice(0, 20)
-      .map(n => ({ name: n.trim(), character: '', photo: '' }))
-      .filter(a => a.name);
-  }
-  if (!items.length) { section.style.display = 'none'; return; }
+  if (!items || !items.length) { section.style.display = 'none'; return; }
   const frag = document.createDocumentFragment();
-  items.forEach(actor => {
+  items.slice(0, 20).forEach(actor => {
     if (!actor.name) return;
-    const card = document.createElement('div');
+    const card     = document.createElement('div');
     card.className = 'castCard';
     const initial  = actor.name.trim()[0].toUpperCase();
-    const photoUrl = actor.photo ? proxyImg(actor.photo) : '';
+    const photoUrl = actor.photo || '';
     card.innerHTML =
       `${photoUrl
         ? `<img class="castPhoto" src="${esc(photoUrl)}" alt="" loading="lazy"
@@ -898,6 +901,57 @@ function renderCast(actors, castStr) {
   });
   el.appendChild(frag);
   section.style.display = '';
+}
+
+// Normaliza cast desde Xtream (array u objetos) o CSV string
+function parseCastXtream(actors, castStr) {
+  if (Array.isArray(actors) && actors.length)
+    return actors.map(a => ({
+      name: a.name || a.actor_name || '',
+      character: a.character || a.actor_character || '',
+      photo: a.profile_path ? TMDB_CAST + a.profile_path : (a.actor_photo || '')
+    }));
+  if (typeof castStr === 'string' && castStr.trim())
+    return castStr.split(',').map(n => ({ name: n.trim(), character: '', photo: '' })).filter(a => a.name);
+  return [];
+}
+
+// Aplica datos TMDB al modal abierto (se llama en paralelo, puede llegar tarde)
+function applyTmdb(tmdb, mediaType) {
+  if (!tmdb) return;
+  // Poster/backdrop HD
+  const backdrop = tmdb.backdrop_path ? TMDB_BACK + tmdb.backdrop_path : '';
+  const poster   = tmdb.poster_path   ? TMDB_POSTER + tmdb.poster_path : '';
+  const bannerEl = $('modalBanner');
+  if (backdrop || poster) bannerEl.src = backdrop || poster;
+  // Descripción en español
+  if (tmdb.overview) $('modalDesc').textContent = tmdb.overview;
+  // Meta enriquecida
+  const genre = (tmdb.genres||[]).slice(0,3).map(g=>g.name).join(', ');
+  const year  = ((tmdb.release_date||tmdb.first_air_date||'')).slice(0,4);
+  const score = tmdb.vote_average ? `★ ${tmdb.vote_average.toFixed(1)}` : '';
+  const rated = (tmdb.release_dates?.results||[])
+    .find(r=>r.iso_3166_1==='MX'||r.iso_3166_1==='US')
+    ?.release_dates?.[0]?.certification || '';
+  const director = mediaType === 'movie'
+    ? (tmdb.credits?.crew||[]).find(c=>c.job==='Director')?.name || ''
+    : '';
+  const parts = [genre, year, score, rated, director ? `Dir: ${director}` : ''].filter(Boolean);
+  if (parts.length) $('modalMeta').textContent = parts.join(' · ');
+  // Reparto con fotos reales
+  const cast = (tmdb.credits?.cast||[]).map(a => ({
+    name: a.name,
+    character: a.character,
+    photo: a.profile_path ? TMDB_CAST + a.profile_path : ''
+  }));
+  if (cast.length) renderCast(cast);
+  // Trailer
+  const trailer = (tmdb.videos?.results||[])
+    .find(v => v.site==='YouTube' && (v.type==='Trailer'||v.type==='Teaser'));
+  if (trailer) {
+    $('btnModalTrailer').style.display = '';
+    $('btnModalTrailer').onclick = () => window.open(`https://www.youtube.com/watch?v=${trailer.key}`, '_blank');
+  }
 }
 
 function updateFavBtn(type, id) {
@@ -1053,17 +1107,29 @@ async function openMovieDetail(m) {
   updateFavBtn('movie', m.stream_id);
   openModal();
   try {
-    const info = await api.get('get_vod_info', `&vod_id=${m.stream_id}`);
-    const d    = info.info || info;
-    const ext  = info.movie_data?.container_extension || 'mp4';
+    // Primero Xtream para obtener tmdb_id real, luego TMDB en paralelo si hay ID
+    const info    = await api.get('get_vod_info', `&vod_id=${m.stream_id}`);
+    const d0      = info?.info || info || {};
+    const tmdbId  = d0.tmdb_id || d0.tmdbId || m.tmdb_id || 0;
+    const [, tmdbData] = await Promise.allSettled([
+      Promise.resolve(info),
+      tmdbId > 0
+        ? tmdbGet(`/movie/${tmdbId}?append_to_response=credits,videos,release_dates`)
+        : Promise.resolve(null)
+    ]);
+    const d   = d0;
+    const ext = info.value?.movie_data?.container_extension || 'mp4';
     S.modalCtx.ext = ext;
+    // Poster base (Xtream)
     const posterUrl = (d.backdrop_path&&d.backdrop_path[0]) || d.movie_image || m.stream_icon || '';
     $('modalBanner').src = proxyImg(posterUrl);
+    // Meta base (Xtream)
     const year  = (d.releasedate || d.releaseDate || '').slice(0, 4);
     const parts = [d.genre, year, d.rating ? `★ ${d.rating}` : '', d.director ? `Dir: ${d.director}` : ''].filter(Boolean);
     $('modalMeta').textContent = parts.join(' · ');
     $('modalDesc').textContent = d.plot || d.description || 'Sin descripción.';
-    renderCast(d.actors || d.cast_info, d.cast);
+    // Cast base (Xtream)
+    renderCast(parseCastXtream(d.actors || d.cast_info, d.cast));
     $('btnModalFav').style.display  = '';
     $('btnModalPlay').style.display = '';
     $('btnModalPlay').onclick = () => { closeModal(); play(api.vodUrl(m.stream_id, ext), m.name); };
@@ -1071,6 +1137,9 @@ async function openMovieDetail(m) {
       $('btnModalTrailer').style.display = '';
       $('btnModalTrailer').onclick = () => window.open(`https://www.youtube.com/watch?v=${d.youtube_trailer}`, '_blank');
     }
+    // TMDB enriquece si llegó (sobreescribe poster, cast con fotos, trailer, meta en español)
+    const tmdb = tmdbData.value || (tmdbData.status === 'fulfilled' ? tmdbData.value : null);
+    if (tmdb?.id) applyTmdb(tmdb, 'movie');
   } catch (_) {
     $('modalDesc').textContent      = 'Sin información adicional.';
     $('btnModalFav').style.display  = '';
@@ -1167,24 +1236,37 @@ async function openSeriesDetail(s) {
   updateFavBtn('series', s.series_id);
   openModal();
   try {
-    const info     = await api.get('get_series_info', `&series_id=${s.series_id}`);
-    const d        = info.info || {};
-    const episodes = info.episodes || {};
-    const seasons  = info.seasons  || [];
+    // Primero Xtream para obtener tmdb_id real, luego TMDB en paralelo si hay ID
+    const seriesInfo = await api.get('get_series_info', `&series_id=${s.series_id}`);
+    const d          = seriesInfo?.info || {};
+    const tmdbId     = d.tmdb_id || d.tmdbId || s.tmdb_id || 0;
+    const [, tmdbData] = await Promise.allSettled([
+      Promise.resolve(seriesInfo),
+      tmdbId > 0
+        ? tmdbGet(`/tv/${tmdbId}?append_to_response=credits,videos`)
+        : Promise.resolve(null)
+    ]);
+    const episodes = seriesInfo?.episodes || {};
+    const seasons  = seriesInfo?.seasons  || [];
+    // Poster base (Xtream)
     $('modalBanner').src = proxyImg(d.backdrop_path || s.cover || '');
     const year  = (d.releaseDate || d.releasedate || '').slice(0, 4);
     const parts = [d.genre, year, d.rating ? `★ ${d.rating}` : ''].filter(Boolean);
     $('modalMeta').textContent = parts.join(' · ');
     $('modalDesc').textContent = d.plot || d.description || '';
-    renderCast(d.actors || d.cast_info, d.cast);
+    renderCast(parseCastXtream(d.actors || d.cast_info, d.cast));
     $('btnModalFav').style.display = '';
     if (d.youtube_trailer) {
       $('btnModalTrailer').style.display = '';
       $('btnModalTrailer').onclick = () => window.open(`https://www.youtube.com/watch?v=${d.youtube_trailer}`, '_blank');
     }
+    // TMDB enriquece poster, cast con fotos, trailer, meta en español
+    const tmdb = tmdbData.value || (tmdbData.status === 'fulfilled' ? tmdbData.value : null);
+    if (tmdb?.id) applyTmdb(tmdb, 'tv');
+    // Temporadas
     const seasonKeys = Object.keys(episodes).sort((a,b) => Number(a)-Number(b));
     if (seasonKeys.length > 0) {
-      S.seriesCtx = { info, seasonKeys, seasons, activeSeason: seasonKeys[0], seriesName: s.name || '' };
+      S.seriesCtx = { info: seriesInfo, seasonKeys, seasons, activeSeason: seasonKeys[0], seriesName: s.name || '' };
       $('seasonsSection').style.display = '';
       renderSeasonTabs();
       renderEpisodes(episodes[seasonKeys[0]] || []);
